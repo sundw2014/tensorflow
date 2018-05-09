@@ -57,15 +57,15 @@ endif
 
 # This library is the main target for this makefile. It will contain a minimal
 # runtime that can be linked in to other programs.
-BIN_PATH := $(BINDIR)label_image
+BIN_PATH := $(BINDIR)label_image_opencv_video
 
-TF_LIB_PATH := $(MAKEFILE_DIR)/../../gen/lib/libtensorflow-lite.a
+TF_LIB_PATH := $(MAKEFILE_DIR)/lib/libtensorflow-lite.a
 
 # What sources we want to compile, must be kept in sync with the main Bazel
 # build files.
 
 SRCS := \
-tensorflow/contrib/lite/examples/label_image/label_image.cc \
+tensorflow/contrib/lite/examples/withOpencv/label_image_opencv_video.cc \
 tensorflow/contrib/lite/examples/label_image/bitmap_helpers.cc
 
 OBJS := $(addprefix $(OBJDIR), \

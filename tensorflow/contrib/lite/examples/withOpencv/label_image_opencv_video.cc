@@ -154,22 +154,21 @@ int Main(int argc, char** argv) {
 
   // setting up the opencv context
   // Create a VideoCapture object and use camera to capture the video
-  cv::VideoCapture cap("test.mp4");
+  cv::VideoCapture cap(0);
 
-  // // Check if camera opened successfully
-  // if(!cap.isOpened())
-  // {
-  //   std::cout << "Error opening video stream" << std::endl;
-  //   return -1;
-  // }
+  // Check if camera opened successfully
+  if(!cap.isOpened())
+  {
+    std::cout << "Error opening video stream" << std::endl;
+    return -1;
+  }
 
   // Default resolution of the frame is obtained.The default resolution is
   // system dependent.
-  // int frame_width = cap.get(CV_CAP_PROP_FRAME_WIDTH);
-  // int frame_height = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
+  int frame_width = cap.get(CV_CAP_PROP_FRAME_WIDTH);
+  int frame_height = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
 
-  int frame_width = 1200;
-  int frame_height = 800;
+  LOG(INFO) << "camera resolution: (w x h) " << frame_width << " x " << frame_height << std::endl;
 
   // Define the codec and create VideoWriter object.The output is stored in
   // 'outcpp.avi' file.
@@ -268,25 +267,19 @@ int Main(int argc, char** argv) {
 
   // main loop
   while (1) {
-    LOG(INFO) << "main loop start" << std::endl;
-
     // Capture frame-by-frame
     cv::Mat frame;
-    frame = cv::imread("test.jpg");
-    // cap >> frame;
-
-    LOG(INFO) << "read frame" << std::endl;
+    cap >> frame;
 
     // If the frame is empty, break immediately
     if (frame.empty()) break;
 
-    LOG(INFO) << "good frame" << std::endl;
-
-    // center crop
+    //TODO: center crop
     int image_width = frame_width;
     int image_height = frame_height;
     int image_channels = 3;
 
+    // convert to array
     std::vector<uint8_t> array;
     if (frame.isContinuous()) {
       array.assign(frame.datastart, frame.dataend);
@@ -296,12 +289,8 @@ int Main(int argc, char** argv) {
                      frame.ptr<uint8_t>(i) + frame.cols);
       }
     }
-    LOG(INFO) << "copy finished" << std::endl;
 
     uint8_t* in = array.data();
-
-    // uint8_t* in = read_bmp(s.input_bmp_name, &image_width, &image_height,
-    //                        &image_channels, &s);
 
     // inference
     switch (interpreter->tensor(input)->type) {
@@ -321,7 +310,6 @@ int Main(int argc, char** argv) {
                    << interpreter->tensor(input)->type << " yet";
         exit(-1);
     }
-    LOG(INFO) << "resize finished" << std::endl;
 
     // if (s.profiling) profiler->StartProfiling();
 
@@ -367,11 +355,11 @@ int Main(int argc, char** argv) {
         exit(-1);
     }
 
-    for (const auto& result : top_results) {
-      const float confidence = result.first;
-      const int index = result.second;
-      LOG(INFO) << confidence << ": " << index << " " << labels[index] << "\n";
-    }
+    // for (const auto& result : top_results) {
+    //   const float confidence = result.first;
+    //   const int index = result.second;
+    //   LOG(INFO) << confidence << ": " << index << " " << labels[index] << "\n";
+    // }
 
     float y0 = 50;
     float dy = 30;
